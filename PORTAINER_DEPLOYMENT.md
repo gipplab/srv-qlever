@@ -47,7 +47,7 @@ sudo chmod -R 755 /data/qlever
 3. Enter a name for your stack (e.g., `qlever-production`)
 4. Choose **Repository** tab
 5. Enter repository details:
-   - **Repository URL**: `https://github.com/gipplab/srv-qlever`
+   - **Repository URL**: `https://github.com/YOUR_USERNAME/srv-qlever` (replace with your fork/repo URL)
    - **Repository reference**: `main` (or your preferred branch)
    - **Compose path**: `docker-stack.yml`
 6. (Optional) Configure authentication if using a private repository
