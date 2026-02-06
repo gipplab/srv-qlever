@@ -88,7 +88,7 @@ The Portainer stack includes:
 - Sufficient storage space for your RDF datasets
 - Minimum 16GB RAM (32GB+ recommended for large datasets)
 
-## Quick Start
+### Quick Start
 
 ### 1. Initialize Docker Swarm
 
@@ -135,9 +135,9 @@ Before QLever can serve queries, you need to create an index. You can do this by
 
 Alternatively, you can exec into the container and manually create the index.
 
-## Services
+### Services
 
-### qlever (SPARQL Endpoint)
+#### qlever (SPARQL Endpoint)
 
 - **Port**: 7001
 - **Purpose**: Main SPARQL query endpoint
@@ -146,16 +146,16 @@ Alternatively, you can exec into the container and manually create the index.
   - Limits: 4 CPUs, 32GB RAM
   - Reservations: 2 CPUs, 16GB RAM
 
-### qlever-ui (Web Interface)
+#### qlever-ui (Web Interface)
 
 - **Port**: 7000
 - **Purpose**: Web-based query interface with autocompletion
 - **Image**: adfreiburg/qlever-ui:latest
 - **Backend**: Connected to qlever service
 
-## Configuration
+### Configuration
 
-### Environment Variables
+#### Environment Variables
 
 You can customize the deployment by modifying environment variables in `docker-stack.yml`:
 
@@ -164,28 +164,28 @@ You can customize the deployment by modifying environment variables in `docker-s
 - `QLEVER_CACHE_MAX_SIZE`: Maximum cache size (default: 10G)
 - `QLEVER_BACKEND_URL`: URL for the UI to connect to the backend (default: http://qlever:7001)
 
-### Volumes
+#### Volumes
 
 - `qlever_data`: Stores the RDF index (mounted to `/data/qlever/index`)
 - `qlever_cache`: Stores query cache (mounted to `/data/qlever/cache`)
 
 **Note**: The volumes are configured as bind mounts. Make sure the directories exist before deploying.
 
-### Resource Limits
+#### Resource Limits
 
 Adjust CPU and memory limits in the `deploy.resources` section based on your:
 - Dataset size
 - Expected query load
 - Available server resources
 
-## Accessing the Services
+### Accessing the Services
 
 After deployment:
 
 - **SPARQL Endpoint**: http://your-server:7001
 - **Web UI**: http://your-server:7000
 
-## Monitoring
+### Monitoring
 
 Check the status of your stack:
 
@@ -201,7 +201,7 @@ docker service logs qlever_qlever-ui
 docker service inspect qlever_qlever
 ```
 
-## Updating the Stack
+### Updating the Stack
 
 To update the stack configuration:
 
@@ -211,7 +211,7 @@ docker stack deploy -c docker-stack.yml qlever
 
 Docker Swarm will perform a rolling update based on the update configuration.
 
-## Scaling
+### Scaling
 
 To scale the QLever service (if needed):
 
@@ -221,7 +221,7 @@ docker service scale qlever_qlever=2
 
 **Note**: Most QLever deployments use a single replica due to the stateful nature of the index.
 
-## Removing the Stack
+### Removing the Stack
 
 To completely remove the stack:
 
@@ -235,19 +235,19 @@ docker stack rm qlever
 docker volume rm qlever_qlever_data qlever_qlever_cache
 ```
 
-## Troubleshooting
+### Troubleshooting
 
-### Service won't start
+#### Service won't start
 
 1. Check logs: `docker service logs qlever_qlever`
 2. Verify directories exist: `/data/qlever/index` and `/data/qlever/cache`
 3. Ensure sufficient resources are available
 
-### No index found message
+#### No index found message
 
 The QLever service requires an index to be created before it can serve queries. Follow the index creation steps in the Quick Start section.
 
-### Port conflicts
+#### Port conflicts
 
 If ports 7000 or 7001 are already in use, modify the port mappings in `docker-stack.yml`:
 
@@ -256,7 +256,7 @@ ports:
   - "8001:7001"  # Change external port
 ```
 
-## Advanced Configuration
+### Advanced Configuration
 
 For production deployments, consider:
 
