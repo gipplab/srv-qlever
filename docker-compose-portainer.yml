@@ -1,5 +1,7 @@
 services:
   portainer:
+    # Using 'latest' tag for automatic updates. For production stability,
+    # consider pinning to a specific version (e.g., portainer/portainer-ce:2.19.4)
     image: portainer/portainer-ce:latest
     container_name: portainer
     restart: unless-stopped
