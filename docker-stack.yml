@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  qlever:
+    image: adfreiburg/qlever:latest
+    ports:
+      - "7001:7001"
+    volumes:
+      - qlever_data:/index
+      - qlever_cache:/cache
+    environment:
+      - QLEVER_PORT=7001
+      - QLEVER_MEMORY_FOR_QUERIES=30G
+      - QLEVER_CACHE_MAX_SIZE=10G
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      resources:
+        limits:
+          cpus: '4'
+          memory: 32G
+        reservations:
+          cpus: '2'
+          memory: 16G
+      labels:
+        - "com.qlever.service=qlever-sparql-endpoint"
+    networks:
+      - qlever_network
+    command: >
+      /bin/bash -c "
+      if [ ! -f /index/.index_created ]; then
+        echo 'No index found. Please create an index first using qlever CLI.';
+        sleep infinity;
+      else
+        ServerMain -i /index -p $$QLEVER_PORT -m $$QLEVER_MEMORY_FOR_QUERIES -c $$QLEVER_CACHE_MAX_SIZE;
+      fi
+      "
+
+  qlever-ui:
+    image: adfreiburg/qlever-ui:latest
+    ports:
+      - "7000:7000"
+    environment:
+      - QLEVER_BACKEND_URL=http://qlever:7001
+      - UI_PORT=7000
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+      labels:
+        - "com.qlever.service=qlever-ui"
+    networks:
+      - qlever_network
+    # Note: depends_on only affects start order in Swarm, not readiness.
+    # The UI should implement retry logic to handle backend startup delays.
+    depends_on:
+      - qlever
+
+networks:
+  qlever_network:
+    driver: overlay
+    attachable: true
+
+volumes:
+  qlever_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/qlever/index
+  qlever_cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/qlever/cache
