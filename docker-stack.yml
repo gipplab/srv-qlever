@@ -1,6 +1,44 @@
 version: '3.8'
 
 services:
+  qlever-control:
+    # Use the latest image from GitHub Container Registry
+    image: ghcr.io/gipplab/qlever-control:latest
+    
+    volumes:
+      # Mount Docker socket to allow running Docker commands on host
+      # SECURITY WARNING: Mounting the Docker socket gives this container full control over
+      # the Docker daemon, equivalent to root access on the host. Only use in trusted environments.
+      # Note: In swarm mode, this will use the socket from the node where the container runs.
+      # This also limits horizontal scaling - the service must run with replicas: 1
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Mount workspace directory for working with files
+      - /public/dumps/public:/public/dumps/public
+      - /srv:/srv
+    
+    environment:
+      # Set to "true" to test Docker connectivity on startup
+      - TEST_DOCKER=false
+    
+    # Keep container running with stdin and tty
+    stdin_open: true
+    tty: true
+    
+    # Deployment configuration for Docker Swarm
+    deploy:
+      # Run one replica of the service
+      # Note: Must be 1 due to Docker socket mount - cannot scale horizontally
+      replicas: 1
+      
+      # Restart policy
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+         constraints:
+           - node.role == worker
   qlever:
     image: adfreiburg/qlever:latest
     ports:
@@ -30,19 +68,13 @@ services:
         reservations:
           cpus: '2'
           memory: 16G
+      placement:
+         constraints:
+           - node.role == worker
       labels:
         - "com.qlever.service=qlever-sparql-endpoint"
     networks:
       - qlever_network
-    command: >
-      /bin/bash -c "
-      if [ ! -f /index/.index_created ]; then
-        echo 'No index found. Please create an index first using qlever CLI.';
-        sleep infinity;
-      else
-        ServerMain -i /index -p $$QLEVER_PORT -m $$QLEVER_MEMORY_FOR_QUERIES -c $$QLEVER_CACHE_MAX_SIZE;
-      fi
-      "
 
   qlever-ui:
     image: adfreiburg/qlever-ui:latest
