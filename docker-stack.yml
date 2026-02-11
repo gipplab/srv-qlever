@@ -26,10 +26,6 @@ services:
     
     # Deployment configuration for Docker Swarm
     deploy:
-      # Run one replica of the service
-      # Note: Must be 1 due to Docker socket mount - cannot scale horizontally
-      replicas: 1
-      
       # Restart policy
       restart_policy:
         condition: on-failure
@@ -40,34 +36,17 @@ services:
          constraints:
            - node.role == worker
   qlever:
-    image: adfreiburg/qlever:latest
+    image: adfreiburg/qlever:REBUILD-INDEX-BETA
     ports:
       - "7001:7001"
     volumes:
-      - qlever_data:/index
-      - qlever_cache:/cache
-    environment:
-      - QLEVER_PORT=7001
-      - QLEVER_MEMORY_FOR_QUERIES=30G
-      - QLEVER_CACHE_MAX_SIZE=10G
+      - /srv:/srv
     deploy:
-      replicas: 1
       restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 3
         window: 120s
-      update_config:
-        parallelism: 1
-        delay: 10s
-        failure_action: rollback
-      resources:
-        limits:
-          cpus: '4'
-          memory: 32G
-        reservations:
-          cpus: '2'
-          memory: 16G
       placement:
          constraints:
            - node.role == worker
@@ -80,10 +59,10 @@ services:
     image: adfreiburg/qlever-ui:latest
     ports:
       - "7000:7000"
-    environment:
-      - QLEVER_BACKEND_URL=http://qlever:7001
-      - UI_PORT=7000
     deploy:
+      placement:
+         constraints:
+           - node.role == manager
       replicas: 1
       restart_policy:
         condition: on-failure
@@ -96,26 +75,8 @@ services:
         - "com.qlever.service=qlever-ui"
     networks:
       - qlever_network
-    # Note: depends_on only affects start order in Swarm, not readiness.
-    # The UI should implement retry logic to handle backend startup delays.
-    depends_on:
-      - qlever
 
 networks:
   qlever_network:
     driver: overlay
     attachable: true
-
-volumes:
-  qlever_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /data/qlever/index
-  qlever_cache:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /data/qlever/cache
