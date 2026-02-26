@@ -41,6 +41,15 @@ services:
       - "7001:7001"
     volumes:
       - /srv:/srv
+      - /srv/qlever:/index
+      - /etc/localtime:/etc/localtime
+    command:
+      - "-c qlever-server -i wikidata -j 8 -p 7001 -m 20G -c 15G -e 5G -k 200 -s 600s -a wikidata_4nOICSfIFEoE > wikidata.server-log.txt 2>&1"
+    entrypoint:
+      - "bash"
+    environment:
+      QLEVER_PROFILE: /etc/profile.d/qlever.sh
+      QLEVER_IS_RUNNING_IN_CONTAINER: 1
     deploy:
       restart_policy:
         condition: on-failure
@@ -59,6 +68,13 @@ services:
     image: adfreiburg/qlever-ui:latest
     ports:
       - "7000:7000"
+    volumes:
+      - /srv/qlever:/app/db
+    environment:
+     - QLEVERUI_DATABASE_URL:"sqlite:////app/db/wikidata.ui-db.sqlite3"
+     - VIRTUAL_ENV: /env
+    command:
+      -"gunicorn --bind :7000 --workers 3 --limit-request-line 10000 qlever.wsgi:application"
     deploy:
       placement:
          constraints:
