@@ -43,10 +43,9 @@ services:
       - /srv:/srv
       - /srv/qlever:/index
       - /etc/localtime:/etc/localtime
+    entrypoint: ["bash", "-c"]
     command:
-      - "-c qlever-server -i wikidata -j 8 -p 7001 -m 20G -c 15G -e 5G -k 200 -s 600s -a wikidata_4nOICSfIFEoE > wikidata.server-log.txt 2>&1"
-    entrypoint:
-      - "bash"
+      - 'qlever-server ... > wikidata.server-log.txt 2>&1'
     environment:
       QLEVER_PROFILE: /etc/profile.d/qlever.sh
       QLEVER_IS_RUNNING_IN_CONTAINER: 1
