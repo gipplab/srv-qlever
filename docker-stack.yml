@@ -71,8 +71,8 @@ services:
     volumes:
       - /srv/qlever:/app/db
     environment:
-     - QLEVERUI_DATABASE_URL:"sqlite:////app/db/wikidata.ui-db.sqlite3"
-     - VIRTUAL_ENV: /env
+      - QLEVERUI_DATABASE_URL: "sqlite:////app/db/wikidata.ui-db.sqlite3"
+      - VIRTUAL_ENV: /env
     command:
       -"gunicorn --bind :7000 --workers 3 --limit-request-line 10000 qlever.wsgi:application"
     deploy:
