@@ -22,13 +22,52 @@ sudo chown -R 1000:1000 /data/qlever  # Adjust UID/GID as needed
 sudo chmod -R 755 /data/qlever
 ```
 
-### 2. Access Portainer
+### 2. Create Required Docker Secrets
+
+The QLever stack requires a Docker secret to be created **before** the stack is deployed.
+
+#### `qlever_access_token`
+
+This token authenticates administrative requests (index updates, cache clearing, etc.) to the QLever server. It corresponds to the `-a` flag in the `docker run` command.
+
+**Option A – Via Portainer UI (recommended):**
+
+1. Open Portainer and select your Docker Swarm environment
+2. In the left sidebar, click **Secrets**
+3. Click **+ Add secret**
+4. Fill in the form:
+   - **Name**: `qlever_access_token`
+   - **Secret**: enter your chosen access token value (e.g. a long random string)
+5. Click **Add secret**
+
+**Option B – Via command line:**
+
+```bash
+printf 'your_access_token_here' | docker secret create qlever_access_token -
+```
+
+> **Note**: Use `printf` instead of `echo` to avoid adding a trailing newline to the secret.
+
+> **Tip**: Generate a strong random token with:
+> ```bash
+> openssl rand -hex 32
+> ```
+
+Verify the secret exists before deploying:
+
+```bash
+docker secret ls
+```
+
+You should see `qlever_access_token` in the list.
+
+### 3. Access Portainer
 
 1. Open your web browser and navigate to your Portainer instance (e.g., `https://portainer.example.com`)
 2. Log in with your credentials
 3. Select your Docker Swarm endpoint
 
-### 3. Deploy the Stack via Portainer UI
+### 4. Deploy the Stack via Portainer UI
 
 #### Option A: Upload the Stack File
 
@@ -65,7 +104,7 @@ sudo chmod -R 755 /data/qlever
 7. (Optional) Add environment variables
 8. Scroll down and click **Deploy the stack**
 
-### 4. Monitor Deployment
+### 5. Monitor Deployment
 
 After clicking deploy:
 
@@ -73,7 +112,7 @@ After clicking deploy:
 2. Once deployed, you'll be redirected to the stack details page
 3. You can see the services, networks, and volumes created
 
-### 5. Verify Services are Running
+### 6. Verify Services are Running
 
 1. In the stack details page, check the **Services** section
 2. Both `qlever` and `qlever-ui` services should show as running
@@ -83,7 +122,7 @@ After clicking deploy:
    - Stats
    - Service configuration
 
-### 6. View Logs
+### 7. View Logs
 
 To view service logs through Portainer:
 
@@ -96,7 +135,7 @@ To view service logs through Portainer:
    - Download logs
    - Adjust log display options
 
-### 7. Access the Application
+### 8. Access the Application
 
 Once deployed and running:
 
@@ -208,21 +247,28 @@ For debugging:
 
 ### Using Secrets
 
-For sensitive data:
+Docker Swarm secrets store sensitive values encrypted and expose them inside containers as files at `/run/secrets/<name>`. The `qlever_access_token` secret used by this stack is an example of this pattern.
 
-1. Navigate to **Secrets** in the sidebar
-2. Create a new secret
-3. Reference it in your stack file:
+**Creating the `qlever_access_token` secret via Portainer:**
 
-```yaml
-secrets:
-  - qlever_config
+1. In the left sidebar, click **Secrets**
+2. Click **+ Add secret**
+3. Set **Name** to `qlever_access_token`
+4. Paste your access token value in the **Secret** field
+5. Click **Add secret**
 
-services:
-  qlever:
-    secrets:
-      - qlever_config
+The secret is then available to the `qlever` service at `/run/secrets/qlever_access_token` inside the container. The stack reads it at startup with:
+
+```bash
+cat /run/secrets/qlever_access_token
 ```
+
+**Rotating the secret:**
+
+1. Create a new secret with a different name (e.g. `qlever_access_token_v2`)
+2. Update `docker-stack.yml` to reference the new secret name
+3. Redeploy the stack via Portainer
+4. Remove the old secret once the stack is running with the new one
 
 ### Using Configs
 
