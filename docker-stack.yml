@@ -34,6 +34,35 @@ services:
         max_attempts: 3
         window: 120s
 
+  qlever:
+    image: adfreiburg/qlever:REBUILD-INDEX-BETA
+    ports:
+      - "7001:7001"
+    volumes:
+      - /srv/qlever:/index
+      - /etc/localtime:/etc/localtime:ro
+    working_dir: /index
+    # Use bash -c as entrypoint to execute the server command in a shell,
+    # matching: docker run --entrypoint bash ... -c 'qlever-server ...'
+    entrypoint: ["bash", "-c"]
+    command:
+      - "qlever-server -i wikidata -j 8 -p 7001 -m 20G -c 15G -e 5G -k 200 -s 600s -a wikidata_4nOICSfIFEoE > wikidata.server-log.txt 2>&1"
+    # Use tini-based init process (equivalent to --init in docker run)
+    init: true
+    deploy:
+      replicas: 1
+      # condition: any restarts on any exit; closest swarm equivalent to --restart=unless-stopped
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - "com.qlever.service=qlever-sparql-endpoint"
+
   qlever-ui:
     image: adfreiburg/qlever-ui:latest
     ports:
