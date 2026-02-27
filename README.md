@@ -108,7 +108,20 @@ sudo mkdir -p /data/qlever/cache
 sudo chmod -R 755 /data/qlever
 ```
 
-### 3. Deploy the Stack
+### 3. Create Required Docker Secrets
+
+The stack requires a Docker secret to exist before deployment.
+
+**`qlever_access_token`** — authenticates administrative requests to the QLever server (corresponds to the `-a` flag).
+
+```bash
+# Generate a strong random token and store it as a Docker secret
+printf "$(openssl rand -hex 32)" | docker secret create qlever_access_token -
+```
+
+Or create it via Portainer (see [Managing Secrets via Portainer](#managing-secrets-via-portainer) below).
+
+### 4. Deploy the Stack
 
 #### Using Docker CLI:
 
@@ -126,7 +139,7 @@ docker stack deploy -c docker-stack.yml qlever
 5. Name your stack (e.g., "qlever")
 6. Click **Deploy the stack**
 
-### 4. Create Your Index
+### 5. Create Your Index
 
 Before QLever can serve queries, you need to create an index. You can do this by:
 
@@ -267,6 +280,25 @@ For production deployments, consider:
 3. **Secrets Management**: Use Docker secrets for sensitive configuration
 4. **Health Checks**: Add health check endpoints for better monitoring
 5. **Backup Strategy**: Regular backups of `/data/qlever/index`
+
+### Managing Secrets via Portainer
+
+Docker Swarm secrets store sensitive values (like the QLever access token) encrypted and mount them as files inside containers. This stack uses the `qlever_access_token` secret.
+
+**Creating the secret in Portainer:**
+
+1. Open Portainer and select your Docker Swarm environment
+2. In the left sidebar, click **Secrets**
+3. Click **+ Add secret**
+4. Set **Name** to `qlever_access_token`
+5. Paste your token value in the **Secret** field
+6. Click **Add secret**
+
+> **Tip**: Generate a secure token with: `openssl rand -hex 32`
+
+The secret is mounted at `/run/secrets/qlever_access_token` inside the container. The qlever service reads it at startup to pass as the `-a` authentication flag.
+
+For full details on secret rotation and advanced usage, see [PORTAINER_DEPLOYMENT.md](PORTAINER_DEPLOYMENT.md).
 
 ## Additional Resources
 

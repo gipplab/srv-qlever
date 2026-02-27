@@ -46,11 +46,17 @@ services:
     #   export QLEVER_UID=$(id -u) QLEVER_GID=$(id -g)
     user: "${QLEVER_UID:-2231}:${QLEVER_GID:-500}"
     working_dir: /index
+    secrets:
+      - qlever_access_token
     # Use bash -c as entrypoint to execute the server command in a shell,
     # matching: docker run --entrypoint bash ... -c 'qlever-server ...'
     entrypoint: ["bash", "-c"]
     command:
-      - "qlever-server -i wikidata -j 8 -p 7001 -m 20G -c 15G -e 5G -k 200 -s 600s -a wikidata_4nOICSfIFEoE > wikidata.server-log.txt 2>&1"
+      # Read the access token from the Docker secret file into a variable to avoid
+      # exposing it in process listings (ps/top would show env-based substitution)
+      - |
+        ACCESS_TOKEN=$(cat /run/secrets/qlever_access_token)
+        exec qlever-server -i wikidata -j 8 -p 7001 -m 20G -c 15G -e 5G -k 200 -s 600s -a "$ACCESS_TOKEN" > wikidata.server-log.txt 2>&1
     # Use tini-based init process (equivalent to --init in docker run)
     init: true
     deploy:
@@ -98,3 +104,11 @@ services:
         delay: 10s
       labels:
         - "com.qlever.service=qlever-ui"
+
+secrets:
+  # Access token for authenticating administrative requests to the QLever server.
+  # Create before deploying (use a strong random value):
+  #   printf "$(openssl rand -hex 32)" | docker secret create qlever_access_token -
+  # Or create via Portainer: Secrets → Add secret (see PORTAINER_DEPLOYMENT.md)
+  qlever_access_token:
+    external: true
