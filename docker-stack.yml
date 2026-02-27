@@ -33,48 +33,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-  qlever:
-    image: adfreiburg/qlever:REBUILD-INDEX-BETA
-    ports:
-      - "7001:7001"
-    volumes:
-      - /srv:/srv
-      - /srv/qlever:/index
-      - /etc/localtime:/etc/localtime
-    command:
-      - qlever-server
-      - -i
-      - wikidata
-      - -j
-      - "8"
-      - -p
-      - "7001"
-      - -m
-      - 20G
-      - -c
-      - 15G
-      - -e
-      - 5G
-      - -k
-      - "200"
-      - -s
-      - 600s
-      - -a
-      - wikidata_4nOICSfIFEoE
-    environment:
-      QLEVER_PROFILE: /etc/profile.d/qlever.sh
-      QLEVER_IS_RUNNING_IN_CONTAINER: 1
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-      placement:
-         constraints:
-           - node.role == worker
-      labels:
-        - "com.qlever.service=qlever-sparql-endpoint"
 
   qlever-ui:
     image: adfreiburg/qlever-ui:latest
