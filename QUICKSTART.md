@@ -4,6 +4,7 @@
 
 ### Deploy Stack
 ```bash
+export QLEVER_UID=$(id -u) QLEVER_GID=$(id -g)
 docker stack deploy -c docker-stack.yml qlever
 ```
 
@@ -23,6 +24,7 @@ docker service logs -f qlever_qlever-ui
 
 ### Update Stack
 ```bash
+export QLEVER_UID=$(id -u) QLEVER_GID=$(id -g)
 docker stack deploy -c docker-stack.yml qlever
 ```
 

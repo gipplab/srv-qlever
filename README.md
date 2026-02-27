@@ -113,6 +113,7 @@ sudo chmod -R 755 /data/qlever
 #### Using Docker CLI:
 
 ```bash
+export QLEVER_UID=$(id -u) QLEVER_GID=$(id -g)
 docker stack deploy -c docker-stack.yml qlever
 ```
 
@@ -206,6 +207,7 @@ docker service inspect qlever_qlever
 To update the stack configuration:
 
 ```bash
+export QLEVER_UID=$(id -u) QLEVER_GID=$(id -g)
 docker stack deploy -c docker-stack.yml qlever
 ```
 

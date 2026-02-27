@@ -41,6 +41,10 @@ services:
     volumes:
       - /srv/qlever:/index
       - /etc/localtime:/etc/localtime:ro
+    # Run as the same UID:GID as the host user (equivalent to -u $(id -u):$(id -g))
+    # Set QLEVER_UID and QLEVER_GID in the environment before deploying:
+    #   export QLEVER_UID=$(id -u) QLEVER_GID=$(id -g)
+    user: "${QLEVER_UID}:${QLEVER_GID}"
     working_dir: /index
     # Use bash -c as entrypoint to execute the server command in a shell,
     # matching: docker run --entrypoint bash ... -c 'qlever-server ...'
