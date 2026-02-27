@@ -75,8 +75,6 @@ services:
            - node.role == worker
       labels:
         - "com.qlever.service=qlever-sparql-endpoint"
-    networks:
-      - qlever_network
 
   qlever-ui:
     image: adfreiburg/qlever-ui:latest
@@ -110,10 +108,3 @@ services:
         delay: 10s
       labels:
         - "com.qlever.service=qlever-ui"
-    networks:
-      - qlever_network
-
-networks:
-  qlever_network:
-    driver: overlay
-    attachable: true
