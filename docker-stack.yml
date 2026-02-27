@@ -50,7 +50,6 @@ services:
     # Use tini-based init process (equivalent to --init in docker run)
     init: true
     deploy:
-      replicas: 1
       # condition: any restarts on any exit; closest swarm equivalent to --restart=unless-stopped
       restart_policy:
         condition: any
