@@ -28,7 +28,7 @@ The QLever stack requires a Docker secret to be created **before** the stack is 
 
 #### `qlever_access_token`
 
-This token authenticates administrative requests (index updates, cache clearing, etc.) to the QLever server. It is passed to the server via the `--access-token` argument.
+This token authenticates administrative requests (index updates, cache clearing, etc.) to the QLever server. It corresponds to the `-a` flag in the `docker run` command.
 
 **Option A – Via Portainer UI (recommended):**
 
