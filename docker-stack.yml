@@ -69,6 +69,8 @@ services:
       placement:
         constraints:
           - node.role == worker
+        max_replicas_per_node: 1
+      replicas: 2
       labels:
         - "com.qlever.service=qlever-sparql-endpoint"
 
