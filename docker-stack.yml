@@ -55,8 +55,8 @@ services:
       # Read the access token from the Docker secret file into a variable to avoid
       # exposing it in process listings (ps/top would show env-based substitution)
       - |
-        ACCESS_TOKEN=$(cat /run/secrets/qlever_access_token)
-        exec qlever-server -i wikidata -j 8 -p 7001 -m 20G -c 15G -e 5G -k 200 -s 600s --access-token "$ACCESS_TOKEN" > wikidata.server-log.txt 2>&1
+        ACCESS_TOKEN=$$(cat /run/secrets/qlever_access_token)
+        exec qlever-server -i wikidata -j 8 -p 7001 -m 20G -c 15G -e 5G -k 200 -s 600s --access-token "$$ACCESS_TOKEN" > wikidata.server-log.txt 2>&1
     # Use tini-based init process (equivalent to --init in docker run)
     init: true
     deploy:
